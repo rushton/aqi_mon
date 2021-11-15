@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+NOW=$(date +%s)
+function cleanup {
+    echo -n "stopping prometheus server..."
+    docker stop prometheus-server-$NOW
+    echo " stopped"
+}
+
+
+trap cleanup EXIT
+
+SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
+docker run \
+    -p 9090:9090 \
+    -v $SCRIPT_DIR/../prometheus.yaml:/etc/prometheus/prometheus.yml \
+    --name prometheus-server-$NOW \
+    -d \
+    prom/prometheus
+
+go run $SCRIPT_DIR/../. -p /dev/cu.usbserial-1410
